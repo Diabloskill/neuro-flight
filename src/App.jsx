@@ -286,12 +286,13 @@ export default function App() {
 
       createButton(x, y, label, textColor, bgColor, callback) {
         const W = this.scale.width;
-        const btnW = Math.min(340, W * 0.45);
+        const fontSize = Math.max(16, Math.min(24, W * 0.018));
+        const btnW = Math.min(400, W * 0.35);
         const btn = this.add.rectangle(x, y, btnW, 54, bgColor, 1)
           .setInteractive({ useHandCursor: true })
           .setStrokeStyle(2, textColor);
         const txt = this.add.text(x, y, label, {
-          fontSize: `${Math.max(16, W * 0.026)}px`, color: "#" + textColor.toString(16).padStart(6, "0"),
+          fontSize: `${fontSize}px`, color: "#" + textColor.toString(16).padStart(6, "0"),
           fontFamily: "monospace", fontStyle: "bold",
         }).setOrigin(0.5);
         btn.on("pointerover", () => { btn.setFillStyle(textColor, 0.18); txt.setScale(1.06); });
