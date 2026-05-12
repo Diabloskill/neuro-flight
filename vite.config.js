@@ -5,12 +5,5 @@ export default defineConfig({
   plugins: [react()],
   build: {
     chunkSizeWarningLimit: 3000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          phaser: ['phaser']
-        }
-      }
-    }
   }
 })
