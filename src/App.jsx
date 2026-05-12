@@ -246,14 +246,16 @@ export default function App() {
 
         const phaseColors = [0x00aaff, 0xffaa00, 0xaa00ff];
         const phaseLabels = ["FASE 1\nZona Neural", "FASE 2\nTempestade Elétrica", "FASE 3\nEspaço Neural"];
-        const badgeW = Math.floor(Math.min(180, (W - 80) / 3));
-        const gap = Math.floor((W - badgeW * 3) / 4);
-        const badgeH = 60;
+        const badgeW = Math.floor((W - 80) / 3);
+        const badgeH = 64;
+        const badgeGap = 20;
+        const totalW = badgeW * 3 + badgeGap * 2;
+        const badgeStartX = (W - totalW) / 2;
         const badgeY = H * 0.62;
-        const badgeFontSize = Math.max(11, Math.min(14, badgeW * 0.085));
+        const badgeFontSize = Math.max(10, Math.min(13, badgeW * 0.075));
 
         phaseLabels.forEach((label, i) => {
-          const bx = gap + i * (badgeW + gap);
+          const bx = badgeStartX + i * (badgeW + badgeGap);
           const bg = this.add.graphics();
           bg.fillStyle(phaseColors[i], 0.1);
           bg.fillRoundedRect(bx, badgeY, badgeW, badgeH, 8);
@@ -263,10 +265,11 @@ export default function App() {
             fontSize: `${badgeFontSize}px`,
             color: "#" + phaseColors[i].toString(16).padStart(6, "0"),
             fontFamily: "monospace", align: "center",
+            wordWrap: { width: badgeW - 10 },
           }).setOrigin(0.5);
         });
 
-        this.createButton(W / 2, badgeY + badgeH + 50, "▶  INICIAR MISSÃO", 0x00ffff, 0x003344, () => {
+        this.createButton(W / 2, badgeY + badgeH + 55, "▶  INICIAR MISSÃO", 0x00ffff, 0x003344, () => {
           resetState();
           this.cameras.main.fade(400, 0, 0, 0);
           this.time.delayedCall(420, () => this.scene.start("PhaseIntroScene"));
