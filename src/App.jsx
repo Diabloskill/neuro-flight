@@ -246,24 +246,27 @@ export default function App() {
 
         const phaseColors = [0x00aaff, 0xffaa00, 0xaa00ff];
         const phaseLabels = ["FASE 1\nZona Neural", "FASE 2\nTempestade Elétrica", "FASE 3\nEspaço Neural"];
-        const badgeW = Math.min(160, W * 0.22);
-        const badgeSpacing = badgeW + 20;
+        const badgeW = Math.floor(Math.min(180, (W - 80) / 3));
+        const gap = Math.floor((W - badgeW * 3) / 4);
+        const badgeH = 60;
         const badgeY = H * 0.62;
+        const badgeFontSize = Math.max(11, Math.min(14, badgeW * 0.085));
 
         phaseLabels.forEach((label, i) => {
-          const bx = W / 2 - badgeSpacing + i * badgeSpacing;
+          const bx = gap + i * (badgeW + gap);
           const bg = this.add.graphics();
           bg.fillStyle(phaseColors[i], 0.1);
-          bg.fillRoundedRect(bx - badgeW / 2, badgeY, badgeW, 60, 8);
+          bg.fillRoundedRect(bx, badgeY, badgeW, badgeH, 8);
           bg.lineStyle(1, phaseColors[i], 0.5);
-          bg.strokeRoundedRect(bx - badgeW / 2, badgeY, badgeW, 60, 8);
-          this.add.text(bx, badgeY + 30, label, {
-            fontSize: `${Math.max(11, W * 0.014)}px`, color: "#" + phaseColors[i].toString(16).padStart(6, "0"),
+          bg.strokeRoundedRect(bx, badgeY, badgeW, badgeH, 8);
+          this.add.text(bx + badgeW / 2, badgeY + badgeH / 2, label, {
+            fontSize: `${badgeFontSize}px`,
+            color: "#" + phaseColors[i].toString(16).padStart(6, "0"),
             fontFamily: "monospace", align: "center",
           }).setOrigin(0.5);
         });
 
-        this.createButton(W / 2, H * 0.79, "▶  INICIAR MISSÃO", 0x00ffff, 0x003344, () => {
+        this.createButton(W / 2, badgeY + badgeH + 50, "▶  INICIAR MISSÃO", 0x00ffff, 0x003344, () => {
           resetState();
           this.cameras.main.fade(400, 0, 0, 0);
           this.time.delayedCall(420, () => this.scene.start("PhaseIntroScene"));
@@ -271,7 +274,7 @@ export default function App() {
 
         this.time.delayedCall(300, () => SFX.menuJingle());
 
-        this.add.text(W / 2, H * 0.92, "← → Mover    ESPAÇO Atirar", {
+        this.add.text(W / 2, H - 30, "← → Mover    ESPAÇO Atirar", {
           fontSize: `${Math.max(13, W * 0.018)}px`, color: "#555599", fontFamily: "monospace",
         }).setOrigin(0.5);
 
