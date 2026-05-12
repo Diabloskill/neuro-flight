@@ -973,10 +973,14 @@ export default function App() {
     // ═══════════════════════════════════════════════
     //  PHASER CONFIG — FULLSCREEN RESPONSIVO
     // ═══════════════════════════════════════════════
+    const container = gameRef.current;
+    const W = container.offsetWidth;
+    const H = container.offsetHeight;
+
     const config = {
       type: Phaser.AUTO,
-      width: document.documentElement.clientWidth,
-      height: document.documentElement.clientHeight,
+      width: W,
+      height: H,
       parent: gameRef.current,
       backgroundColor: "#050816",
       scale: {
