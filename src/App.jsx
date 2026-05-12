@@ -976,8 +976,7 @@ export default function App() {
     // ═══════════════════════════════════════════════
     //  PHASER CONFIG — FULLSCREEN RESPONSIVO
     // ═══════════════════════════════════════════════
-    const container = gameRef.current;
-    const W = window.screen.width > window.innerWidth ? window.innerWidth : window.screen.width;
+    const W = window.innerWidth;
     const H = window.innerHeight;
 
     const config = {
