@@ -974,8 +974,8 @@ export default function App() {
     //  PHASER CONFIG — FULLSCREEN RESPONSIVO
     // ═══════════════════════════════════════════════
     const container = gameRef.current;
-    const W = container.offsetWidth;
-    const H = container.offsetHeight;
+    const W = window.screen.width > window.innerWidth ? window.innerWidth : window.screen.width;
+    const H = window.innerHeight;
 
     const config = {
       type: Phaser.AUTO,
