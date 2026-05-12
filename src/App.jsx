@@ -975,8 +975,8 @@ export default function App() {
     // ═══════════════════════════════════════════════
     const config = {
       type: Phaser.AUTO,
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight,
       parent: gameRef.current,
       backgroundColor: "#050816",
       scale: {
