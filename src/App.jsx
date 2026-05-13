@@ -93,12 +93,11 @@ export default function App() {
       currentQuestion: 0,
       score: 0,
       lives: 3,
-      consecutiveErrors: 0,
       totalErrors: 0,
     };
 
     function resetState() {
-      state = { currentPhase: 0, currentQuestion: 0, score: 0, lives: 3, consecutiveErrors: 0, totalErrors: 0 };
+      state = { currentPhase: 0, currentQuestion: 0, score: 0, lives: 3, totalErrors: 0 };
     }
 
     // ═══════════════════════════════════════════════
@@ -164,17 +163,6 @@ export default function App() {
       wrong() {
         playTone({ freq: 300, freqEnd: 150, type: "sawtooth", duration: 0.25, volume: 0.15, attack: 0.01, decay: 0.22 });
         setTimeout(() => playNoise({ duration: 0.15, volume: 0.08, highpass: 400 }), 50);
-      },
-      turbulence() {
-        playNoise({ duration: 0.4, volume: 0.12, highpass: 200 });
-        playTone({ freq: 80, freqEnd: 55, type: "sawtooth", duration: 0.4, volume: 0.12, attack: 0.02, decay: 0.35 });
-        setTimeout(() => playNoise({ duration: 0.3, volume: 0.1, highpass: 150 }), 250);
-      },
-      altitudeDrop() {
-        [90, 70, 55, 70].forEach((f, i) => {
-          setTimeout(() => playTone({ freq: f, type: "sawtooth", duration: 0.12, volume: 0.14, attack: 0.01, decay: 0.1 }), i * 90);
-        });
-        playNoise({ duration: 0.5, volume: 0.1, highpass: 100 });
       },
       loseLife() {
         playTone({ freq: 200, freqEnd: 60, type: "sawtooth", duration: 0.5, volume: 0.2, attack: 0.01, decay: 0.45 });
@@ -480,7 +468,6 @@ export default function App() {
         this.lifeText = this.add.text(20, hudH * 0.66, "Vidas: ❤❤❤", { fontSize: `${fs}px`, color: "#ff5555", fontFamily: "monospace" });
         this.questNumText = this.add.text(W - 20, hudH * 0.1, "Q 1/3", { fontSize: `${fs * 0.85}px`, color: "#aaaaff", fontFamily: "monospace" }).setOrigin(1, 0);
         this.add.text(W - 20, hudH * 0.38, ["FASE 1", "FASE 2", "FASE 3"][state.currentPhase], { fontSize: `${fs * 0.85}px`, color: "#" + this.cfg.accentColor.toString(16).padStart(6, "0"), fontFamily: "monospace", fontStyle: "bold" }).setOrigin(1, 0);
-        this.errorIndicator = this.add.text(W - 20, hudH * 0.66, "", { fontSize: `${fs * 0.8}px`, color: "#ff4444", fontFamily: "monospace" }).setOrigin(1, 0);
 
         // Question box
         const qBoxY = hudH + 8;
@@ -510,14 +497,11 @@ export default function App() {
         this.answers = this.add.group();
         this.answerTexts = [];
         this.answerBoxGfx = [];
-        this.turbulence = false;
-        this.altitudeDrop = 0;
 
         this.createAnswers();
         this.input.keyboard.on("keydown-SPACE", () => this.shoot());
         this.cameras.main.fadeIn(400, 0, 0, 0);
         this.updateLivesDisplay();
-        this.updateErrorDisplay();
       }
 
       buildBackground() {
@@ -616,11 +600,7 @@ export default function App() {
         g.fillStyle(0x003366, 1);
         g.fillRect(x - 14 * s, y + 4 * s, 4 * s, 10 * s);
         g.fillRect(x + 10 * s, y + 4 * s, 4 * s, 10 * s);
-        if (this.turbulence) {
-          g.x = Phaser.Math.Between(-3, 3);
-        } else {
-          g.x = 0;
-        }
+        g.x = 0;
       }
 
       createAnswers() {
@@ -636,7 +616,7 @@ export default function App() {
         const spacing = W / data.answers.length;
         const answerAreaStart = this.hudH + this.qBoxH + 30;
         const answerAreaEnd = this.playerY - 80;
-        const baseY = answerAreaStart + (answerAreaEnd - answerAreaStart) * 0.35 + this.altitudeDrop;
+        const baseY = answerAreaStart + (answerAreaEnd - answerAreaStart) * 0.35;
         const boxW = Math.min(160, spacing * 0.85);
         const boxH = Math.max(50, H * 0.08);
         const fontSize = Math.max(13, H * 0.02);
@@ -677,13 +657,6 @@ export default function App() {
         this.lifeText.setText("Vidas: " + "❤".repeat(Math.max(0, state.lives)));
       }
 
-      updateErrorDisplay() {
-        const errSymbols = state.consecutiveErrors > 0
-          ? "Erros: " + "✕".repeat(state.consecutiveErrors)
-          : "";
-        this.errorIndicator.setText(errSymbols);
-      }
-
       shoot() {
         SFX.shoot();
         const bullet = this.add.rectangle(this.playerX, this.playerY - 32, 5, 20, this.cfg.bulletColor);
@@ -691,39 +664,24 @@ export default function App() {
         this.bullets.add(bullet);
       }
 
-      applyPenalty(level) {
-        if (level === 1) {
-          this.turbulence = true;
-          SFX.turbulence();
-          this.cameras.main.shake(600, 0.015);
-          this.cameras.main.flash(200, 255, 100, 0);
-          this.showFloatingText("⚡ TURBULÊNCIA!", 0xffaa00);
-          this.time.delayedCall(2000, () => { this.turbulence = false; });
-        } else if (level === 2) {
-          this.altitudeDrop = Math.min(this.altitudeDrop + 60, 180);
-          SFX.altitudeDrop();
-          this.cameras.main.shake(800, 0.022);
-          this.cameras.main.flash(300, 255, 50, 0);
-          this.showFloatingText("📉 PERDENDO ALTITUDE!", 0xff6600);
-        } else if (level >= 3) {
-          state.lives--;
-          state.consecutiveErrors = 0;
-          this.altitudeDrop = 0;
-          this.turbulence = false;
-          SFX.loseLife();
-          this.updateLivesDisplay();
-          this.cameras.main.shake(1000, 0.03);
-          this.cameras.main.flash(400, 255, 0, 0);
-          this.showFloatingText("💥 SISTEMA COLAPSANDO!", 0xff0000);
-          if (state.lives <= 0) {
-            this.time.delayedCall(800, () => {
-              this.cameras.main.fade(600, 0, 0, 0);
-              this.time.delayedCall(620, () =>
-                this.scene.start("GameOverScene", { win: false, score: state.score })
-              );
-            });
-            return true;
-          }
+      // ── NOVA LÓGICA: perde 1 vida por erro ──
+      applyWrongAnswer() {
+        state.lives--;
+        state.totalErrors++;
+        SFX.loseLife();
+        this.updateLivesDisplay();
+        this.cameras.main.shake(800, 0.025);
+        this.cameras.main.flash(350, 255, 0, 0);
+        this.showFloatingText("💥 ERROU! -1 VIDA", 0xff3333);
+
+        if (state.lives <= 0) {
+          this.time.delayedCall(800, () => {
+            this.cameras.main.fade(600, 0, 0, 0);
+            this.time.delayedCall(620, () =>
+              this.scene.start("GameOverScene", { win: false, score: state.score })
+            );
+          });
+          return true; // game over
         }
         return false;
       }
@@ -767,9 +725,6 @@ export default function App() {
               if (enemy.answer === this.questions[state.currentQuestion].correct) {
                 SFX.correct();
                 state.score += 100 + state.currentPhase * 50;
-                state.consecutiveErrors = 0;
-                this.altitudeDrop = 0;
-                this.turbulence = false;
                 this.scoreText.setText("Pontos: " + state.score);
                 this.spawnExplosion(enemy.bx, enemy.by, this.cfg.accentColor, true);
                 this.showFloatingText("+100 pts ✓", 0x00ff88);
@@ -791,17 +746,13 @@ export default function App() {
                   return;
                 }
                 this.questionText.setText(this.questions[state.currentQuestion].question);
-                this.updateErrorDisplay();
                 this.time.delayedCall(200, () => this.createAnswers());
               } else {
                 SFX.wrong();
-                state.consecutiveErrors++;
-                state.totalErrors++;
                 this.spawnExplosion(enemy.bx, enemy.by, 0xff3300, false);
                 if (this.answerTexts[idx]) { this.answerTexts[idx].destroy(); this.answerTexts.splice(idx, 1); this.answerBoxGfx.splice(idx, 1); }
                 enemy.destroy(); this.answers.remove(enemy);
-                this.updateErrorDisplay();
-                const gameOver = this.applyPenalty(state.consecutiveErrors);
+                const gameOver = this.applyWrongAnswer();
                 if (!gameOver) {
                   this.time.delayedCall(300, () => this.createAnswers());
                 }
